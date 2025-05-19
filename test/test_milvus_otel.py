@@ -36,17 +36,12 @@ grpc_client_instrumentor.instrument()
 # Get a tracer
 tracer = trace.get_tracer(__name__)
 
-@pytest.fixture(scope="module")
-def milvus_client():
-    with tracer.start_as_current_span("milvus_client_setup"):
-        client = MilvusClient(
+
+def test_milvus_otel():
+    with tracer.start_as_current_span("test_milvus_otel"):
+        milvus_client = MilvusClient(
             uri="http://localhost:19530",
         )
-    yield client
-    client.close()
-
-def test_milvus_otel(milvus_client):
-    with tracer.start_as_current_span("test_milvus_otel"):
         collection_name = "quick_setup"
 
         # Drop the collection if it exists
@@ -89,3 +84,4 @@ def test_milvus_otel(milvus_client):
 
         # Clean up
         milvus_client.drop_collection(collection_name)
+        milvus_client.close()
